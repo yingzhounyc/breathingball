@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Breathe With Me</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        transition: background 1s ease;
+        background: linear-gradient(to bottom, #a8d8ff, #e6f6ff);
+    }
+
+    h1 {
+        color: white;
+        margin-bottom: 10px;
+        font-weight: 300;
+        text-align: center;
+    }
+
+    #instruction {
+        color: white;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .circle {
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, #ffffff 0%, #88c9ff 70%);
+        border-radius: 50%;
+        transition: transform 4s ease-in-out;
+        box-shadow: 0 0 40px rgba(255,255,255,0.7);
+    }
+
+    .controls {
+        position: absolute;
+        bottom: 30px;
+        text-align: center;
+    }
+
+    button {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        background: rgba(255,255,255,0.8);
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: white;
+    }
+
+</style>
+</head>
+
+<body>
+
+<h1>Let's Breathe Together</h1>
+<div id="instruction">Inhale...</div>
+<div class="circle" id="circle"></div>
+
+<div class="controls">
+    <button onclick="setMood('calm')">Calm</button>
+    <button onclick="setMood('angry')">Angry</button>
+    <button onclick="setMood('scared')">Scared</button>
+    <button onclick="toggleBreathing()">Pause / Start</button>
+</div>
+
+<script>
+let circle = document.getElementById("circle");
+let instruction = document.getElementById("instruction");
+
+let inhaleTime = 4000;
+let exhaleTime = 4000;
+let holdTime = 1000;
+let breathing = true;
+
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playChime() {
+    let oscillator = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.2);
+}
+
+function breathe() {
+    if (!breathing) return;
+
+    instruction.innerText = "Inhale...";
+    circle.style.transition = inhaleTime + "ms ease-in-out";
+    circle.style.transform = "scale(1.8)";
+    playChime();
+
+    setTimeout(() => {
+        instruction.innerText = "Hold...";
+    }, inhaleTime);
+
+    setTimeout(() => {
+        instruction.innerText = "Exhale...";
+        circle.style.transition = exhaleTime + "ms ease-in-out";
+        circle.style.transform = "scale(1)";
+        playChime();
+    }, inhaleTime + holdTime);
+
+    setTimeout(() => {
+        breathe();
+    }, inhaleTime + exhaleTime + holdTime);
+}
+
+function toggleBreathing() {
+    breathing = !breathing;
+    if (breathing) breathe();
+}
+
+function setMood(mood) {
+    if (mood === "calm") {
+        document.body.style.background = "linear-gradient(to bottom, #a8d8ff, #e6f6ff)";
+        inhaleTime = 4000;
+        exhaleTime = 4000;
+    }
+
+    if (mood === "angry") {
+        document.body.style.background = "linear-gradient(to bottom, #ff9a9e, #ffd3d3)";
+        inhaleTime = 5000;
+        exhaleTime = 6000;
+    }
+
+    if (mood === "scared") {
+        document.body.style.background = "linear-gradient(to bottom, #c3aed6, #e0c3fc)";
+        inhaleTime = 4500;
+        exhaleTime = 5000;
+    }
+}
+
+breathe();
+</script>
+
+</body>
+</html>
